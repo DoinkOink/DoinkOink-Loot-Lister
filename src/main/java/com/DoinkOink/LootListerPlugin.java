@@ -92,7 +92,7 @@ public class LootListerPlugin extends Plugin {
 			int _price = itemManager.getItemPrice(_realId);
 			BufferedImage _image = itemManager.getImage(_realId, _item.getQuantity(), false);
 
-			listerOverlay.addDropToOverlay(new LootListerItem(_realId, _ic.getName(), _item.getQuantity(), _price, _image));
+			listerOverlay.addDropToQueue(new LootListerItem(_realId, _ic.getName(), _item.getQuantity(), _price, _image));
 		}
 	}
 
