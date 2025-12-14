@@ -15,6 +15,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class LootListerOverlay extends OverlayPanel
@@ -22,7 +23,8 @@ public class LootListerOverlay extends OverlayPanel
 	private static final int H_PADDING = 2;
 	private static final int V_PADDING = 1;
 	private static final int TEXT_WIDTH = 22;
-	private static final int TEXT_SCROLL_SPEED = 3;
+	private static final int TEXT_VERTICAL_SCROLL_SPEED = 5;
+	private static final int TEXT_HORIZONTAL_SCROLL_SPEED = 10;
 
 	private final Client client;
 	private final LootListerConfig config;
@@ -30,11 +32,13 @@ public class LootListerOverlay extends OverlayPanel
 
 	private List<LootListerItem> items = new ArrayList<>();
 	private List<LootListerItem> itemQueue = new ArrayList<>();
+	private List<LootListerItem> itemsToRemove = new ArrayList<>();
 
 	private FontMetrics fontMetrics;
-	private boolean waitForTextMovement = false;
+	private boolean textVerticalMovement = false;
 
 	private int maxX = 100;
+	private static final int DEFAULT_WIDTH = 100;
 
 	@Inject
 	private LootListerOverlay(Client _client, LootListerConfig _config, LootListerPlugin _plugin)
@@ -52,62 +56,72 @@ public class LootListerOverlay extends OverlayPanel
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		int curY = 0;
-		boolean _addNextItem = items.size() == 0;
 		boolean _isTextMoving = false;
 
 		fontMetrics = graphics.getFontMetrics();
 		final int _fontHeight = fontMetrics.getHeight();
 
-		for(LootListerItem _item : items)
-		{
-			final int _stringWidth = fontMetrics.stringWidth(_item.ItemText);
-			final TextComponent _textComponent = new TextComponent();
+		for (LootListerItem _item : items) {
+			drawItem(graphics, _item, _fontHeight);
 
-			graphics.drawImage(
-				_item.Image,
-				maxX - (config.iconSize() + _stringWidth + (H_PADDING * 2)),
-				_item.CurrentPosition.y,
-				config.iconSize(),
-				config.iconSize(),
-				null
-			);
-
-			_textComponent.setColor(Color.yellow);
-			_textComponent.setText(_item.ItemText);
-			_textComponent.setOutline(true);
-			_textComponent.setPosition(new Point(
-				maxX - (_stringWidth + H_PADDING),
-				_item.CurrentPosition.y + (config.iconSize() / 2) + (_fontHeight / 2)
-			));
-
-			_textComponent.render(graphics);
-
-			curY += Math.max(config.iconSize(), _fontHeight);
-			maxX = Math.max(maxX, config.iconSize() + (H_PADDING * 2) + _stringWidth);
+			maxX = Math.max(maxX, config.iconSize() + (H_PADDING * 2) + _item.TextWidth);
 
 			// Move the text if it needs to be
-			if (_item.CurrentPosition.y > _item.NextPosition.y) {
-				_item.CurrentPosition.y -= TEXT_SCROLL_SPEED;
-				_isTextMoving = true;
-			} else if (_item.CurrentPosition.y < _item.NextPosition.y) {
+			if (_item.CurrentPosition.y < _item.NextPosition.y - TEXT_VERTICAL_SCROLL_SPEED) {
 				_item.CurrentPosition.y = _item.NextPosition.y;
+			} else if (_item.CurrentPosition.y > _item.NextPosition.y) {
+				_item.CurrentPosition.y -= TEXT_VERTICAL_SCROLL_SPEED;
+				_isTextMoving = true;
+			}
+
+			if (_item.CurrentPosition.x < (_item.NextPosition.x + TEXT_HORIZONTAL_SCROLL_SPEED)) {
+				_item.CurrentPosition.x = _item.NextPosition.x;
+			} else if (_item.CurrentPosition.x > _item.NextPosition.x) {
+				_item.CurrentPosition.x -= TEXT_HORIZONTAL_SCROLL_SPEED;
+				_isTextMoving = true;
+			}
+		}
+
+		// Animate all the items that need to be removed from the screen
+		for(int i = itemsToRemove.size()-1; i >= 0; i--) {
+			LootListerItem _itemToRemove = itemsToRemove.get(i);
+
+			if (_itemToRemove.CurrentPosition.x >= _itemToRemove.NextPosition.x) {
+				itemsToRemove.remove(i);
+			} else {
+				drawItem(graphics, _itemToRemove, _fontHeight);
+				_itemToRemove.CurrentPosition.x += TEXT_HORIZONTAL_SCROLL_SPEED;
 			}
 		}
 
 		if (!_isTextMoving && itemQueue.size() != 0)
 			startScrollItems();
 
-		if (_isTextMoving && !waitForTextMovement) {
+		if (_isTextMoving && !textVerticalMovement) {
 			LootListerItem _firstItem = items.get(0);
+
+			if (_firstItem.CurrentPosition.getY() == _firstItem.NextPosition.getY())
+				_firstItem = items.get(1);
+
 			double _totalDistance = _firstItem.OriginalPosition.getY() - _firstItem.NextPosition.getY();
 			double _remainingDistance = _firstItem.CurrentPosition.getY() - _firstItem.NextPosition.getY();
 
-			if (_remainingDistance <= 0)
+			if (_remainingDistance / _totalDistance <= 0.5)
 				addNextDropToOverlay();
 		}
 
-		return new Dimension(maxX, config.iconSize() * config.maxDisplayedItems());
+		// Check to see if we need to remove the last item in the list because it's been showing for too long
+		if (items.size() != 0) {
+			LootListerItem _lastItem = items.get(items.size() - 1);
+
+			if (config.maxDisplayTime() != 0 && _lastItem.TimeDisplayed >= config.maxDisplayTime())
+				setItemForRemoval(items.remove(items.size() - 1));
+		}
+
+		if (items.size() == 0 && itemQueue.size() != 0)
+			addNextDropToOverlay();
+
+		return new Dimension(maxX, config.iconSize() * (config.maxDisplayedItems() + 1));
 	}
 
 	public void addDropToQueue(LootListerItem _item)
@@ -126,50 +140,49 @@ public class LootListerOverlay extends OverlayPanel
 		if (itemQueue.size() == 0)
 			return;
 
-		waitForTextMovement = true;
+		if (items.size() + 1 > config.maxDisplayedItems())
+			setItemForRemoval(items.remove(items.size()-1));
+
+		textVerticalMovement = true;
 
 		LootListerItem _itemToAdd = itemQueue.remove(itemQueue.size()-1);
 
-		_itemToAdd.SetFirstPosition(new Point(
-			0,
-			config.iconSize() * (config.maxDisplayedItems() - 1)
-		));
+		_itemToAdd.TextWidth = fontMetrics.stringWidth(_itemToAdd.ItemText);
+		maxX = getMaxX(config.iconSize() + (H_PADDING * 2) + _itemToAdd.TextWidth);
+
+		_itemToAdd.SetFirstPosition(
+			new Point(
+				maxX,
+				config.iconSize() * (config.maxDisplayedItems())
+			),
+			new Point(
+				maxX - (config.iconSize() + _itemToAdd.TextWidth + (H_PADDING * 2)),
+				config.iconSize() * (config.maxDisplayedItems())
+			)
+		);
 
 		items.add(0, _itemToAdd);
+		updateItemHorizontalPositions();
+	}
 
-		if (items.size() > config.maxDisplayedItems())
-			items.remove(items.size()-1);
+	public void updateItemHorizontalPositions()
+	{
+		for (int i = 1; i < items.size(); i++) {
+			LootListerItem _item = items.get(i);
+			_item.SetHorizontalPosition(maxX - (config.iconSize() + _item.TextWidth + (H_PADDING * 2)));
+		}
 	}
 
 	public void updateDropItemsCount()
 	{
-		while(items.size() > config.maxDisplayedItems())
-		{
-			items.remove(items.size()-1);
-		}
+		items.clear();
 	}
 
-	//private void updateItemPositions()
-	//{
-	//	final int _maxHeight = config.iconSize() * config.maxDisplayedItems();
-	//
-	//	for (int i = 0; i < items.size(); i++) {
-	//		LootListerItem _item = items.get(i);
-	//
-	//		if (fontMetrics != null)
-	//			_item.TextWidth = fontMetrics.stringWidth(_item.ItemText);
-	//
-	//		final Point _point = new Point(
-	//			0,
-	//			_maxHeight - ((i+1) * config.iconSize())
-	//		);
-	//
-	//		if (i == 0)
-	//			_item.SetFirstPosition(_point);
-	//		else
-	//			_item.SetNextPosition(_point);
-	//	}
-	//}
+	public void updateOldestItemTimer()
+	{
+		if (items.size() > 0)
+			items.get(items.size()-1).TimeDisplayed += 0.6;
+	}
 
 	private void startScrollItems()
 	{
@@ -181,7 +194,52 @@ public class LootListerOverlay extends OverlayPanel
 			));
 		}
 
-		waitForTextMovement = false;
+		textVerticalMovement = false;
+	}
+
+	private void setItemForRemoval(LootListerItem _item)
+	{
+		itemsToRemove.add(_item);
+
+		_item.SetNextPosition(new Point(
+			maxX + 10,
+			_item.CurrentPosition.y
+		));
+	}
+
+	private int getMaxX(int _maxX)
+	{
+		_maxX = Math.max(DEFAULT_WIDTH, _maxX);
+
+		for(LootListerItem _item : items) {
+			_maxX = Math.max(_maxX, config.iconSize() + (H_PADDING * 2) + _item.TextWidth);
+		}
+
+		return _maxX;
+	}
+
+	private void drawItem(Graphics2D _graphics, LootListerItem _item, int _fontHeight)
+	{
+		final TextComponent _textComponent = new TextComponent();
+
+		_graphics.drawImage(
+			_item.Image,
+			_item.CurrentPosition.x,
+			_item.CurrentPosition.y,
+			config.iconSize(),
+			config.iconSize(),
+			null
+		);
+
+		_textComponent.setColor(Color.yellow);
+		_textComponent.setText(_item.ItemText);
+		_textComponent.setOutline(true);
+		_textComponent.setPosition(new Point(
+			_item.CurrentPosition.x + config.iconSize() + H_PADDING,
+			_item.CurrentPosition.y + (config.iconSize() / 2) + (_fontHeight / 2)
+		));
+
+		_textComponent.render(_graphics);
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.DoinkOink;
 
+import com.DoinkOink.Misc.LootListerSide;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -36,4 +37,18 @@ public interface LootListerConfig extends Config
 	{
 		return 26;
 	}
+
+	@ConfigItem(
+		keyName = "maxDisplayTime",
+		name = "Max display time",
+		description = "How long the last item in the list will be displayed on screen. If set to 0 it will show until the max item displayed has been reached."
+	)
+	default double maxDisplayTime() { return 1; }
+
+	@ConfigItem(
+		keyName = "sideToAnimateFrom",
+		name = "Side To Animate From",
+		description = "Which side the items should appear and disappear from."
+	)
+	default LootListerSide sideToAnimateFrom() { return LootListerSide.RIGHT;}
 }

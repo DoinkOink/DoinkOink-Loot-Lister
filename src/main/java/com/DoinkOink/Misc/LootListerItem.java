@@ -11,13 +11,13 @@ public class LootListerItem
 	public final String ItemText;
 	public final int Quantity;
 	public final int Price;
-	public final float TimeDisplayed = 0f;
 	public final BufferedImage Image;
 
 	public Point CurrentPosition = new Point(0,0);
 	public Point NextPosition = new Point(0,0);
 	public Point OriginalPosition = new Point(0, 0);
 	public int TextWidth = 0;
+	public double TimeDisplayed = 0;
 
 	public LootListerItem(int _id, String _name, int _quantity, int _price, BufferedImage _image)
 	{
@@ -34,9 +34,14 @@ public class LootListerItem
 		NextPosition = _nextPos;
 	}
 
-	public void SetFirstPosition(Point _pos)
+	public void SetFirstPosition(Point _start, Point _end)
 	{
-		CurrentPosition = _pos;
-		SetNextPosition(_pos);
+		CurrentPosition = _start;
+		SetNextPosition(_end);
+	}
+
+	public void SetHorizontalPosition(int _x)
+	{
+		CurrentPosition.x = OriginalPosition.x = NextPosition.x = _x;
 	}
 }
