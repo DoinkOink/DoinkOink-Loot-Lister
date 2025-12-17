@@ -1,2 +1,4 @@
-# Example
-An example greeter plugin
+# Loot Lister
+## Requires `Loot Logger` to be enabled to work
+
+Displays a list of recently received loot on screen with a configurable price threshold.
