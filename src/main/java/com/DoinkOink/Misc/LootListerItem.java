@@ -1,7 +1,5 @@
 package com.DoinkOink.Misc;
 
-import net.runelite.client.util.AsyncBufferedImage;
-
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 
@@ -15,9 +13,10 @@ public class LootListerItem
 
 	public Point CurrentPosition = new Point(0,0);
 	public Point NextPosition = new Point(0,0);
-	public Point OriginalPosition = new Point(0, 0);
+	public Point StartingPosition = new Point(0, 0);
 	public int TextWidth = 0;
 	public double TimeDisplayed = 0;
+	public boolean JustAdded = true;
 
 	public LootListerItem(int _id, String _name, int _quantity, int _price, BufferedImage _image)
 	{
@@ -30,7 +29,7 @@ public class LootListerItem
 
 	public void SetNextPosition(Point _nextPos)
 	{
-		OriginalPosition = new Point(CurrentPosition.x, CurrentPosition.y);
+		StartingPosition = new Point(CurrentPosition.x, CurrentPosition.y);
 		NextPosition = _nextPos;
 	}
 
@@ -42,6 +41,31 @@ public class LootListerItem
 
 	public void SetHorizontalPosition(int _x)
 	{
-		CurrentPosition.x = OriginalPosition.x = NextPosition.x = _x;
+		CurrentPosition.x = StartingPosition.x = NextPosition.x = _x;
+	}
+
+	public double GetRemainingHorizontalDistance()
+	{
+		return StartingPosition.x < NextPosition.x
+			? NextPosition.getX() - CurrentPosition.getX()
+			: CurrentPosition.getX() - NextPosition.getX();
+	}
+	public double GetRemainingVerticalDistance()
+	{
+		return StartingPosition.y < NextPosition.y
+			? NextPosition.getY() - CurrentPosition.getY()
+			: CurrentPosition.getY() - NextPosition.getY();
+	}
+
+	public double GetTotalVerticalDistance()
+	{
+		return StartingPosition.y < NextPosition.y
+			? NextPosition.getY() - StartingPosition.getY()
+			: StartingPosition.getY() - NextPosition.getY();
+	}
+
+	public double GetVerticalDistancePercentage()
+	{
+		return GetRemainingVerticalDistance() / GetTotalVerticalDistance();
 	}
 }

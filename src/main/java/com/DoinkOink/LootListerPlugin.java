@@ -6,7 +6,9 @@ import com.google.inject.Provides;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.GameState;
 import net.runelite.api.ItemComposition;
+import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -21,6 +23,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.OverlayMenuEntry;
 
 import java.awt.image.BufferedImage;
+import java.util.List;
 
 import static net.runelite.api.MenuAction.RUNELITE_OVERLAY_CONFIG;
 import static net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE;
@@ -31,12 +34,6 @@ import static net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE;
 )
 public class LootListerPlugin extends Plugin {
 	@Inject
-	private Client client;
-
-	@Inject
-	private LootListerConfig config;
-
-	@Inject
 	private LootListerOverlay listerOverlay;
 
 	@Inject
@@ -44,11 +41,6 @@ public class LootListerPlugin extends Plugin {
 
 	@Inject
 	private ItemManager itemManager;
-
-	@Inject
-	private SkillIconManager iconManager;
-
-	private long lastTickMillis;
 
 	@Override
 	protected void startUp() throws Exception
@@ -60,25 +52,27 @@ public class LootListerPlugin extends Plugin {
 		overlayManager.add(listerOverlay);
 	}
 
-	//@Override
-	//protected void shutDown() throws Exception
-	//{
-	//	log.debug("Example stopped!");
-	//}
-
-	//@Subscribe
-	//public void onGameStateChanged(GameStateChanged gameStateChanged)
-	//{
-	//	if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
-	//	{
-	//
-	//	}
-	//}
+	@Subscribe
+	public void onGameStateChanged(GameStateChanged gameStateChanged)
+	{
+		listerOverlay.clearItemsFromOverlay();
+	}
 
 	@Subscribe
 	public void onConfigChanged(final ConfigChanged event)
 	{
-		listerOverlay.updateDropItemsCount();
+		final List<String> _configKeysToClear = List.of(
+			"iconSize",
+			"maxDisplayedItems",
+			"maxDisplayTime",
+			"spaceBetweenIconAndText",
+			"spaceBetweenItems",
+			"sideToAnimateFrom",
+			"stackDirection"
+		);
+
+		if (_configKeysToClear.contains(event.getKey()))
+			listerOverlay.clearItemsFromOverlay();
 	}
 
 	@Subscribe
@@ -87,7 +81,7 @@ public class LootListerPlugin extends Plugin {
 		for (ItemStack _item : event.getItems()) {
 			ItemComposition _ic = itemManager.getItemComposition(_item.getId());
 			int _realId = _ic.getNote() == -1 ? _ic.getId() : _ic.getLinkedNoteId();
-			int _price = itemManager.getItemPrice(_realId);
+			int _price = Math.max(itemManager.getItemPrice(_realId), _ic.getHaPrice());
 			BufferedImage _image = itemManager.getImage(_realId, _item.getQuantity(), false);
 
 			listerOverlay.addDropToQueue(new LootListerItem(_realId, _ic.getName(), _item.getQuantity(), _price, _image));
