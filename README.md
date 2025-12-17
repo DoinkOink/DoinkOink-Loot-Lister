@@ -1,4 +1,4 @@
-<h1><img src="plugin_banner.png" width="303" height="72"></h1>
+# ![plugin_banner.png](plugin_banner.png)
 
 ### Requires `Loot Logger` to be enabled to work
 
