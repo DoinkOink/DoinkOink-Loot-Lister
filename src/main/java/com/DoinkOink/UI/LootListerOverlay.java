@@ -16,7 +16,9 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class LootListerOverlay extends OverlayPanel
 {
@@ -27,6 +29,8 @@ public class LootListerOverlay extends OverlayPanel
 	private final List<LootListerItem> items = new ArrayList<>();				// The currently displayed items
 	private final List<LootListerItem> itemQueue = new ArrayList<>();			// All the items that need to be displayed
 	private final List<LootListerItem> itemsToRemove = new ArrayList<>();		// The current items being animated before being removed
+
+	private final Map<String, int> npcFilters = new HashMap<>();				// All of the per NPC value filters
 
 	private FontMetrics fontMetrics;											// The current graphics font metrics which will be used to get an items text width
 	private int currentOverlayWidth = DEFAULT_OVERLAY_WIDTH;					// How wide the current overlay is
@@ -148,8 +152,17 @@ public class LootListerOverlay extends OverlayPanel
 
 	public void addDropToQueue(LootListerItem _item)
 	{
-		// Only add the item to the queue if the items price is over the configured value
-		if (_item.Price < config.minValueToDisplay())
+		// Set the initial value to check to the configured global ammount
+		int _minValueToCheck = config.minValueToDisplay();
+		
+		// Check to see if the source NPC is in the configured NPC Filter dictionary and if it is change the value to check to the new value
+		if (_item.SourceName != null && npcFilters.containsKey(_item.SourceName)) {
+			_minValueToCheck = npcFilters.get(_item.SourceName);
+		else if (_item.SourceID != null && npcFilters.containsKey(_item.SourceID))
+			_minValueToCheck = npcFilters.get(_item.SourceID);
+		
+		// Now check to see if the item's price surpasses the min value
+		if (_item.Price < _minValueToCheck)
 			return;
 
 		itemQueue.add(0, _item);
@@ -222,6 +235,23 @@ public class LootListerOverlay extends OverlayPanel
 	public void clearItemsFromOverlay()
 	{
 		items.clear();
+	}
+
+	// Update the NPC filtering list to later be used when checking to see if an item should be added to the overlay
+	public void updateNpcFilters()
+	{
+ 		npcFilters.clear();
+
+		final String[] _filters = config.npcFilters().split(",");
+		for (String _filter : _filters) {
+			try {
+				final String[] _splitFilter = _filter.split(":");
+				npcFilters.add(_splitFilter[0].trim().toLowerCase(), Integer.parseInt(_splitFilter[1].trim()));
+			} catch (Exception e) {
+				System.out.println("Error occured when updating NPC Filters: " + e.getMessage());
+				continue;
+			}
+		}
 	}
 
 	// Add 0.6s to the last items timer every tick, so it can be removed from the screen if configured to do so.
