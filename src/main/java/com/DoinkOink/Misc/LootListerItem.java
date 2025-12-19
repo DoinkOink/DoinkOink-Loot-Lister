@@ -8,7 +8,8 @@ import java.awt.image.BufferedImage;
 public class LootListerItem
 {
 	public final int ID;
-	public NPCComposition npc;
+	public final String SourceName;
+	public final int SourceID;
 	public final String ItemText;
 	public final int Quantity;
 	public final int Price;
@@ -24,11 +25,15 @@ public class LootListerItem
 	public LootListerItem(int _id, NPCComposition _npc, String _name, int _quantity, int _price, BufferedImage _image)
 	{
 		ID = _id;
-		npc = _npc;
 		ItemText = (_quantity > 1 ? _quantity + " " : "") + _name;
 		Quantity = _quantity;
 		Price = _price * _quantity;
 		Image = _image;
+
+		if (_npc != null) {
+			SourceName = _npc.getName().toLowerCase();
+			SourceID = Integer.toString(_npc.getId());
+		}
 	}
 
 	public void SetNextPosition(Point _nextPos)
