@@ -1,11 +1,14 @@
 package com.DoinkOink.Misc;
 
+import net.runelite.api.NPCComposition;
+
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 
 public class LootListerItem
 {
 	public final int ID;
+	public NPCComposition npc;
 	public final String ItemText;
 	public final int Quantity;
 	public final int Price;
@@ -18,9 +21,10 @@ public class LootListerItem
 	public double TimeDisplayed = 0;
 	public boolean JustAdded = true;
 
-	public LootListerItem(int _id, String _name, int _quantity, int _price, BufferedImage _image)
+	public LootListerItem(int _id, NPCComposition _npc, String _name, int _quantity, int _price, BufferedImage _image)
 	{
 		ID = _id;
+		npc = _npc;
 		ItemText = (_quantity > 1 ? _quantity + " " : "") + _name;
 		Quantity = _quantity;
 		Price = _price * _quantity;

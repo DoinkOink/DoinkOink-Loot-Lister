@@ -79,6 +79,14 @@ public interface LootListerConfig extends Config
 	default int spaceBetweenIconAndText() { return 2; }
 
 	@ConfigItem(
+		keyName = "npcFilters",
+		name = "NPC Specific Values",
+		description = "Comma separated display prices per NPC. To add an NPC put their {name or NPC ID}:{min value}/nExample: Cow:100,Goblin:20",
+		section = displaySection
+	)
+	default String npcFilters() { return ""; }
+
+	@ConfigItem(
 		keyName = "sideToAnimateFrom",
 		name = "Direction to appear from",
 		description = "Which side the items should appear and disappear from.",
