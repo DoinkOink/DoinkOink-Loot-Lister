@@ -9,7 +9,7 @@ public class LootListerItem
 {
 	public final int ID;
 	public final String SourceName;
-	public final int SourceID;
+	public final String SourceID;
 	public final String ItemText;
 	public final int Quantity;
 	public final int Price;
@@ -33,6 +33,9 @@ public class LootListerItem
 		if (_npc != null) {
 			SourceName = _npc.getName().toLowerCase();
 			SourceID = Integer.toString(_npc.getId());
+		} else {
+			SourceName = "";
+			SourceID = "";
 		}
 	}
 

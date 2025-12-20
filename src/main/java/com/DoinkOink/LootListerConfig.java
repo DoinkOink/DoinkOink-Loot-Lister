@@ -81,8 +81,9 @@ public interface LootListerConfig extends Config
 	@ConfigItem(
 		keyName = "npcFilters",
 		name = "NPC Specific Values",
-		description = "Comma separated display prices per NPC. To add an NPC put their {name or NPC ID}:{min value}/nExample: Cow:100,Goblin:20",
-		section = displaySection
+		description = "Comma separated display values per NPC. To add an NPC put their {name or NPC ID}:{min value}/nExample: Cow:100,Goblin:20",
+		section = displaySection,
+		position = 100
 	)
 	default String npcFilters() { return ""; }
 

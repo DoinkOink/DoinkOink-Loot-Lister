@@ -80,7 +80,7 @@ public class LootListerPlugin extends Plugin {
 		if (_configKeysToClear.contains(event.getKey()))
 			listerOverlay.clearItemsFromOverlay();
 
-		if (event.getKey() == "npcFilters")
+		if (event.getKey().equals("npcFilters"))
 			listerOverlay.updateNpcFilters();
 	}
 

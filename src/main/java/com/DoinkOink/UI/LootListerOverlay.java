@@ -30,7 +30,7 @@ public class LootListerOverlay extends OverlayPanel
 	private final List<LootListerItem> itemQueue = new ArrayList<>();			// All the items that need to be displayed
 	private final List<LootListerItem> itemsToRemove = new ArrayList<>();		// The current items being animated before being removed
 
-	private final Map<String, int> npcFilters = new HashMap<>();				// All of the per NPC value filters
+	private final Map<String, Integer> npcFilters = new HashMap<>();			// All the per NPC value filters
 
 	private FontMetrics fontMetrics;											// The current graphics font metrics which will be used to get an items text width
 	private int currentOverlayWidth = DEFAULT_OVERLAY_WIDTH;					// How wide the current overlay is
@@ -156,9 +156,9 @@ public class LootListerOverlay extends OverlayPanel
 		int _minValueToCheck = config.minValueToDisplay();
 		
 		// Check to see if the source NPC is in the configured NPC Filter dictionary and if it is change the value to check to the new value
-		if (_item.SourceName != null && npcFilters.containsKey(_item.SourceName)) {
+		if (!_item.SourceName.isEmpty() && npcFilters.containsKey(_item.SourceName))
 			_minValueToCheck = npcFilters.get(_item.SourceName);
-		else if (_item.SourceID != null && npcFilters.containsKey(_item.SourceID))
+		else if (!_item.SourceID.isEmpty() && npcFilters.containsKey(_item.SourceID))
 			_minValueToCheck = npcFilters.get(_item.SourceID);
 		
 		// Now check to see if the item's price surpasses the min value
@@ -246,10 +246,13 @@ public class LootListerOverlay extends OverlayPanel
 		for (String _filter : _filters) {
 			try {
 				final String[] _splitFilter = _filter.split(":");
-				npcFilters.add(_splitFilter[0].trim().toLowerCase(), Integer.parseInt(_splitFilter[1].trim()));
+
+				if (npcFilters.containsKey(_splitFilter[0].trim().toLowerCase()))
+					continue;
+
+				npcFilters.put(_splitFilter[0].trim().toLowerCase(), Integer.parseInt(_splitFilter[1].trim()));
 			} catch (Exception e) {
-				System.out.println("Error occured when updating NPC Filters: " + e.getMessage());
-				continue;
+				System.out.println("Error occurred when updating NPC Filters: " + e.getMessage());
 			}
 		}
 	}
