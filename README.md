@@ -2,39 +2,39 @@
 
 Displays a list of recently received loot on screen with a configurable price threshold.
 
-## Config Settings
+<img src="plugin_example.gif" width="640" height="360">
 
-### Display Settings
-#### Icon Size:
+## Display Settings
+<ins>Icon Size:</ins>\
 How big item icons will be.
 
-#### Max Displayed Items:
+<ins>Max Displayed Items:</ins>\
 How many items can be shown at once.
 
-#### Max Display Time:
+<ins>Max Display Time:</ins>\
 How long the last item in the list will be displayed on screen. If set to 0 it will show until the max item displayed has been reached.
 
-#### Minimum Value:
+<ins>Minimum Value:</ins>\
 The minimum value an item must be to be displayed.
 
-#### Space Between Icons and Text:
+<ins>Space Between Icons and Text:</ins>\
 How much space is between an items icon and text.
 
-#### Space Between Items:
+<ins>Space Between Items:</ins>\
 How much vertical space is between each displayed item.
 
-#### NPC Specific Values:
+<ins>NPC Specific Values:</ins>\
 Comma separated display values per NPC. To add an NPC put their {name or NPC ID}:{min value}/nExample: Cow:100,Goblin:20
 
-### Animation Settings
-#### Direction to appear from:
+## Animation Settings
+<ins>Direction to appear from:</ins>\
 Which side the items should appear and disappear from.
 
-#### Item Stack Direction:
+<ins>Item Stack Direction:</ins>\
 What direction items should stack in the list.
 
-#### Horizontal Scroll Speed:
+<ins>Horizontal Scroll Speed:</ins>\
 How fast the text will scroll left and right.
 
-#### Vertical Scroll Speed:
+<ins>Vertical Scroll Speed:</ins>\
 How fast the text will scroll up and down.
