@@ -251,9 +251,7 @@ public class LootListerOverlay extends OverlayPanel
 					continue;
 
 				npcFilters.put(_splitFilter[0].trim().toLowerCase(), Integer.parseInt(_splitFilter[1].trim()));
-			} catch (Exception e) {
-				System.out.println("Error occurred when updating NPC Filters: " + e.getMessage());
-			}
+			} catch (Exception ignored) { }
 		}
 	}
 
