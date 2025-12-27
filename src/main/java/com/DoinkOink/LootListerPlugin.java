@@ -58,6 +58,14 @@ public class LootListerPlugin extends Plugin {
 		overlayManager.add(listerOverlay);
 	}
 
+	@Override
+	protected void shutDown() throws Exception
+	{
+		listerOverlay.clearItemsFromOverlay();
+
+		overlayManager.remove(listerOverlay);
+	}
+
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
@@ -83,19 +91,6 @@ public class LootListerPlugin extends Plugin {
 		if (event.getKey().equals("npcFilters"))
 			listerOverlay.updateNpcFilters();
 	}
-
-	//@Subscribe
-	//public void onLootReceived(final LootReceived event)
-	//{
-	//	for (ItemStack _item : event.getItems()) {
-	//		ItemComposition _ic = itemManager.getItemComposition(_item.getId());
-	//		int _realId = _ic.getNote() == -1 ? _ic.getId() : _ic.getLinkedNoteId();
-	//		int _price = Math.max(itemManager.getItemPrice(_realId), _ic.getHaPrice());
-	//		BufferedImage _image = itemManager.getImage(_realId, _item.getQuantity(), false);
-	//
-	//		listerOverlay.addDropToQueue(new LootListerItem(_realId, _ic.getName(), _item.getQuantity(), _price, _image));
-	//	}
-	//}
 
 	@Subscribe
 	public void onServerNpcLoot(final ServerNpcLoot event)
