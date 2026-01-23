@@ -57,7 +57,7 @@ public interface LootListerConfig extends Config
 	@ConfigItem(
 		keyName = "maxDisplayTime",
 		name = "Max display time",
-		description = "How long the last item in the list will be displayed on screen. If set to 0 it will show until the max item displayed has been reached.",
+		description = "How many ticks the last item in the list will be displayed on screen. If set to 0 it will show until the max item displayed has been reached.",
 		section = displaySection
 	)
 	default double maxDisplayTime() { return 10; }
@@ -81,7 +81,7 @@ public interface LootListerConfig extends Config
 	@ConfigItem(
 		keyName = "npcFilters",
 		name = "NPC Specific Values",
-		description = "Comma separated display values per NPC. To add an NPC put their {name or NPC ID}:{min value}/nExample: Cow:100,Goblin:20",
+		description = "Comma separated display values per NPC. To add an NPC put their {name or NPC ID}:{min value} Example: Cow:100,Goblin:20",
 		section = displaySection,
 		position = 100
 	)
