@@ -27,7 +27,10 @@ How much vertical space is between each displayed item.
 What color the text displays in.
 
 <ins>Time Remove Method:</ins>\
-What method should be used to remove items from the list. One At A Time: Remove items one at a time with each item taking the Max Display Time. By Drop Group: Remove all items from the same drop at the same time. Time Since Last Drop: Items will only disappear if an item isn't added within the Max Display Time.
+What method should be used to remove items from the list. 
+* **One At A Time:** Remove items one at a time with each item taking the Max Display Time.
+* **By Drop Group:** Remove all items from the same drop at the same time.
+* **Time Since Last Drop:** Items will only disappear if an item isn't added within the Max Display Time.
 
 <ins>NPC Specific Values:</ins>\
 Comma separated display values per NPC. To add an NPC put their {name or NPC ID}:{min value}/nExample: Cow:100,Goblin:20
