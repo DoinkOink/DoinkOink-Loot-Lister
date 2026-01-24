@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.NPCComposition;
+import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.client.config.ConfigManager;
@@ -24,9 +25,7 @@ import net.runelite.client.ui.overlay.OverlayMenuEntry;
 
 import java.awt.image.BufferedImage;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static net.runelite.api.MenuAction.RUNELITE_OVERLAY_CONFIG;
 import static net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE;
@@ -90,17 +89,17 @@ public class LootListerPlugin extends Plugin {
 		);
 
 		if (_configKeysToClear.contains(event.getKey()))
-			lootListManager.clearItemsFromOverlay();
+			lootListManager.setAllItemsForRemoval();
 
 		if (event.getKey().equals("npcFilters"))
 			lootListManager.updateNpcFilters();
 	}
 
 	@Subscribe
-	public void onGameTick(GameTick event)
-	{
-		lootListManager.onTick();
-	}
+	public void onGameTick(GameTick event) { lootListManager.onTick(); }
+
+	@Subscribe
+	public void onClientTick(ClientTick event) { lootListManager.updateItems(); }
 
 	// Add loot to the queue when an NPC is killed/looted
 	@Subscribe

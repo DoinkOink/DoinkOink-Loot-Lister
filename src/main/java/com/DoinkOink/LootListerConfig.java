@@ -1,11 +1,14 @@
 package com.DoinkOink;
 
+import com.DoinkOink.Misc.DisplayTimeMethod;
 import com.DoinkOink.Misc.LootListerSide;
 import com.DoinkOink.Misc.LootListerStackSide;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
+
+import java.awt.Color;
 
 @ConfigGroup("Loot Lister")
 public interface LootListerConfig extends Config
@@ -77,6 +80,22 @@ public interface LootListerConfig extends Config
 		section = displaySection
 	)
 	default int spaceBetweenIconAndText() { return 2; }
+
+	@ConfigItem(
+		keyName = "textColor",
+		name = "Text Color",
+		description = "What color the text displays in.",
+		section = displaySection
+	)
+	default Color textColor() { return Color.yellow; }
+
+	@ConfigItem(
+		keyName = "displayTimeMethod",
+		name = "Time Remove Method",
+		description = "What method should be used to remove items from the list. One At A Time: Remove items one at a time with each item taking the Max Display Time. By Drop Group: Remove all items from the same drop at the same time. Time Since Last Drop: Items will only disappear if an item isn't added within the Max Display Time.",
+		section = displaySection
+	)
+	default DisplayTimeMethod displayTimeMethod() { return DisplayTimeMethod.ONE_AT_A_TIME; }
 
 	@ConfigItem(
 		keyName = "npcFilters",

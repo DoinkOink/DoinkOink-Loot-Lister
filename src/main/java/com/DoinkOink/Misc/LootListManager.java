@@ -20,6 +20,8 @@ public class LootListManager {
 	private final List<LootListerItem> itemQueue = new ArrayList<>();			// All the items that need to be displayed
 	private final Map<String, Integer> npcFilters = new HashMap<>();			// All the per NPC value filters
 
+	private int timeSinceLastItemAdded = 0;
+
 	@Inject
 	public LootListManager(LootListerConfig _config, LootListerOverlay _overlay)
 	{
@@ -32,6 +34,8 @@ public class LootListManager {
 	// Receive a LootListerItem and decide if it needs to go to the item queue or be immediately displayed
 	public void addDropToQueue(LootListerItem item)
 	{
+		timeSinceLastItemAdded = 0;
+
 		// Set the initial value to check to the configured global amount
 		int _minValueToCheck = config.minValueToDisplay();
 
@@ -187,14 +191,37 @@ public class LootListManager {
 		));
 	}
 
+	public void setAllItemsForRemoval()
+	{
+		for(int i = Items.size()-1; i >= 0; i--)
+		{
+			setItemForRemoval(Items.remove(i));
+		}
+	}
+
 	// Remove all items from the screen. This will be called when the player changes config settings as it breaks the
 	//	layout if we don't clear them.
 	public void clearItemsFromOverlay() { Items.clear(); }
 
 	public void onTick()
 	{
-		//for(LootListerItem _item : Items) { _item.TicksDisplayed += 1; }
-		Items.get(Items.size()-1).TicksDisplayed += 1;
+		var _displayTimeMethod = config.displayTimeMethod();
+
+		if (_displayTimeMethod == DisplayTimeMethod.ONE_AT_A_TIME)
+		{
+			Items.get(Items.size()-1).TicksDisplayed += 1;
+		}
+		else if (_displayTimeMethod == DisplayTimeMethod.BY_DROP_GROUP)
+		{
+			for(LootListerItem _item : Items) { _item.TicksDisplayed += 1; }
+		}
+		else if (_displayTimeMethod == DisplayTimeMethod.TIME_SINCE_LAST_DROP)
+		{
+			timeSinceLastItemAdded += 1;
+
+			if (timeSinceLastItemAdded >= config.maxDisplayTime())
+				setAllItemsForRemoval();
+		}
 	}
 
 	// Update the NPC filtering list to later be used when checking to see if an item should be added to the overlay

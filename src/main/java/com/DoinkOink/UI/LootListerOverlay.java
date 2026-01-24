@@ -68,8 +68,6 @@ public class LootListerOverlay extends OverlayPanel
 			drawItem(graphics, _item, _fontHeight);
 		}
 
-		manager.updateItems();
-
 		// Always return the current max size of the overlay.
 		return new Dimension(currentOverlayWidth, (config.iconSize() + config.spaceBetweenItems()) * (config.maxDisplayedItems() + 1));
 	}
@@ -87,7 +85,7 @@ public class LootListerOverlay extends OverlayPanel
 			null
 		);
 
-		_textComponent.setColor(Color.yellow);
+		_textComponent.setColor(config.textColor());
 		_textComponent.setText(item.ItemText);
 		_textComponent.setOutline(true);
 		_textComponent.setPosition(new Point(
