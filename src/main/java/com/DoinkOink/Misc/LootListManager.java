@@ -77,7 +77,6 @@ public class LootListManager {
 		// Check to see if add this item will change the current max width
 		int _itemWidth = config.iconSize() + (config.spaceBetweenIconAndText() * 2) + _itemToAdd.TextWidth;
 		int _overlayWidth = overlay.calcMaxOverlayWidth(Items, _itemWidth);
-		System.out.println(_overlayWidth);
 
 		// Set up the initial screen positions of the item based on some animation configurations
 		_itemToAdd.SetFirstPosition(
